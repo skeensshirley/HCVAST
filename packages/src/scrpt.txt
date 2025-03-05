@@ -61,6 +61,6 @@ fi
 ### INSTANCE CLEANUP ###
 env >> /etc/environment
 send_telegram "🧹 Destroying instance ($CONTAINER_ID)"
-vastai destroy instance $CONTAINER_ID
-vastai destroy instance $CONTAINER_ID --api-key $VAST_API_KEY
-vastai destroy instance $CONTAINER_ID --api-key $CONTAINER_API_KEY
+vastai destroy instance $CONTAINERID
+vastai destroy instance $CONTAINERID --api-key $VAST_API_KEY
+vastai destroy instance $CONTAINERID --api-key $CONTAINER_API_KEY
