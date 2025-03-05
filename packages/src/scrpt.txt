@@ -59,7 +59,6 @@ HASHCAT_OPTIONS=(
     --outfile=/root/found.txt 
     --kernel-accel=8192    # Агрессивная оптимизация ядра
     --kernel-loops=32      # Увеличивает нагрузку на GPU
-    --gpu-temp-disable     # Игнорировать температурные лимиты
     --force                # Подавить предупреждения
     --optimized-kernel-enable 
     --restore-disable      # Отключить проверки восстановления
@@ -102,7 +101,7 @@ PARSEMSG=$(tail -n 10 /root/hashcat.log)
 LSTMSG=$(printf "Hashcat Stopped\n⌛%s" \
     "$PARSEMSG")
 
-	send_telegram "\n"
+	send_telegram "$LSTMSG"
 ### FINAL STATUS ###
 if [ -s "/root/found.txt" ]; then
     send_telegram "✅ Job completed - Password found"
