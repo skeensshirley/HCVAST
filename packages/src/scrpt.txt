@@ -22,10 +22,10 @@ HASHCAT_OPTIONS=(
     --optimized-kernel-enable 
     -w 3               # Maximum workload profile
     --session=metask 
-	--runtime=600 
-	--hwmon-disable
+    --runtime=600 
+    --hwmon-disable
     --outfile=/root/found.txt
-	-S
+    -S
 )
 
 ### EXECUTION ###
