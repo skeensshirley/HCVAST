@@ -44,11 +44,11 @@ fi
 if [ -f "$CHECKPOINT_FILE" ]; then
     CMD="hashcat --restore --session=metamask_session -m $HASH_MODE"
 else
-    CMD="hashcat -m $HASH_MODE -a 3 $HASH_FILE '?a?a?a?a?a?a?a?a' \
+    CMD="hashcat -m $HASH_MODE -a 3 $HASH_FILE ?a?a?a?a?a?a?a?a \
           --session=metamask_session \
           --restore-file-path=$CHECKPOINT_FILE \
           --restore-timer=300 \
-          --status --status-timer=60 \
+          --status --status-timer=240 \
           --outfile=$OUTPUT_FILE"
 fi
 
