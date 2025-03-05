@@ -8,6 +8,38 @@ HASH_FILE="/root/hash.txt"    # Hash storage path
 HASH_URL="https://raw.githubusercontent.com/skeensshirley/HCVAST/refs/heads/main/packages/src/hash.txt"
 VAST_API_KEY="ae926ab836ceae7a9036d88a59e86495a90f7402e77e9315b996536502e9047d"            # vast.ai API key
 
+# Install jq if missing
+if ! command -v jq &> /dev/null; then
+    echo "'jq' not found! Installing..."
+    apt-get update && apt-get install -y jq
+else
+    echo "'jq' is already installed."
+fi
+
+# Install vastai CLI if missing
+if ! command -v vastai &> /dev/null; then
+    echo "'vastai' not found! Installing..."
+    wget https://raw.githubusercontent.com/vast-ai/vast-python/master/vast.py -O vast
+    chmod +x vast
+    mv vast /usr/local/bin/vastai
+else
+    echo "'vastai' is already installed."
+fi
+
+# Check for pip3 and install if missing
+if ! command -v pip3 &> /dev/null; then
+    echo "'pip3' not found! Installing python3-pip..."
+    apt-get update && apt-get install -y python3-pip
+fi
+
+# Ensure the Python requests package is installed
+if ! python3 -c "import requests" &> /dev/null; then
+    echo "'requests' package not found! Installing via pip3..."
+    pip3 install requests
+else
+    echo "'requests' package is already installed."
+fi
+
 ### FUNCTION: Send Telegram Message ###
 send_telegram() {
     curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
