@@ -30,23 +30,28 @@ else
 fi
 PID=$!
 
-### ACCURATE STATISTICS PARSING ###
+### RELIABLE STATISTICS PARSING ###
 while kill -0 $PID 2>/dev/null; do
-    # Get latest progress line from log
+    # Get latest progress line
     PROGRESS_LINE=$(grep -a "Progress.........:" /root/hashcat.log | tail -1)
     SPEED_LINE=$(grep -a "Speed...........:" /root/hashcat.log | tail -1)
     
-    # Extract values with proper formatting
-    PROGRESS=$(echo "$PROGRESS_LINE" | awk '{print $2}' | cut -d'/' -f1 | tr -d ',')
-    TOTAL_KEYS=$(echo "$PROGRESS_LINE" | awk '{print $2}' | cut -d'/' -f2 | tr -d ',')
-    SPEED=$(echo "$SPEED_LINE" | awk '{sum = $3 + $5; printf "%.2f MH/s", sum/1000000}')
-    PROGRESS_PCT=$(echo "scale=2; ($PROGRESS / $TOTAL_KEYS) * 100" | bc -l)
-
-    # Handle initial state
-    if [ -z "$PROGRESS_PCT" ]; then
+    # Extract progress percentage
+    PROGRESS_PCT=$(echo "$PROGRESS_LINE" | awk '{print $4}' | tr -d '()%')
+    
+    # Calculate accurate speed
+    SPEED=$(echo "$SPEED_LINE" | awk '{
+        gsub(/,/, "", $2);
+        gsub(/,/, "", $4);
+        sum = $2 + $4;
+        printf "%.2f MH/s", sum/1000000
+    }')
+    
+    # Handle initialization state
+    if [ -z "$SPEED" ] || [ "$SPEED" = "0.00 MH/s" ]; then
         STATE="Initializing"
-        SPEED="0 MH/s"
-        PROGRESS_PCT="0"
+        SPEED="0.00 MH/s"
+        PROGRESS_PCT="0.00"
     else
         STATE="Running"
     fi
