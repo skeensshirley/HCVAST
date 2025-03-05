@@ -49,14 +49,22 @@ send_telegram() {
 
 ### HASHCAT OPTIMIZATION ###
 HASHCAT_OPTIONS=(
-    -m "$HASH_MODE" -a 3 
-    --status --status-timer=10 
-#    --optimized-kernel-enable 
-    -w 3               # Maximum workload profile
+    -m "$HASH_MODE" 
+    -a 3 
+    --status 
+    --status-timer=5       # Более частый статус
+    -w 4                   # Максимальный workload
     --session=metask 
-    --hwmon-disable
-    --outfile=/root/found.txt
-    -S
+    --hwmon-disable 
+    --outfile=/root/found.txt 
+    --kernel-accel=8192    # Агрессивная оптимизация ядра
+    --kernel-loops=32      # Увеличивает нагрузку на GPU
+    --gpu-temp-disable     # Игнорировать температурные лимиты
+    --force                # Подавить предупреждения
+    --optimized-kernel-enable 
+    --restore-disable      # Отключить проверки восстановления
+    -n 64                  # Увеличить размер кеша
+    --spin-damp=0          # Макс. использование CPU для управления
 )
 
 ### EXECUTION ###
