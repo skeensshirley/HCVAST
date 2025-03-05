@@ -52,7 +52,7 @@ HASHCAT_OPTIONS=(
     -m "$HASH_MODE" -a 3 
     --status --status-timer=10 
     --optimized-kernel-enable 
-    -w 3               # Maximum workload profile
+    -w 4               # Maximum workload profile
     --session=metask 
     --hwmon-disable
     --outfile=/root/found.txt
