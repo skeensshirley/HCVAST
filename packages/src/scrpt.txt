@@ -46,20 +46,11 @@ while kill -0 $PID 2>/dev/null; do
         sum = $2 + $4;
         printf "%.2f MH/s", sum/1000000
     }')
-    
-    # Handle initialization state
-    if [ -z "$SPEED" ] || [ "$SPEED" = "0.00 MH/s" ]; then
-        STATE="Initializing"
-        SPEED="0.00 MH/s"
-        PROGRESS_PCT="0.00"
-    else
-        STATE="Running"
-    fi
 
     send_telegram "$(printf "Status: %s\nSpeed: %s\nProgress: %s%%" \
         "$STATE" "$SPEED" "$PROGRESS_PCT")"
     
-    sleep 10
+    sleep 20
 done
 
 ### FINAL CLEANUP (keep existing) ###
