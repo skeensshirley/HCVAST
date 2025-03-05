@@ -24,7 +24,6 @@ HASHCAT_OPTIONS=(
     --session=metask 
     --hwmon-disable
     --outfile=/root/found.txt
-    -S
 )
 
 ### EXECUTION ###
