@@ -77,17 +77,17 @@ sleep 60
 while kill -0 $PID 2>/dev/null; do
 
     # Get raw status from session file
-    PROGRESS=$(tail -n 28 /root/hashcat.log | grep Progress)
-    SPEED=$(tail -n 28 /root/hashcat.log  | grep Speed.#*)
-	STATUS=$(tail -n 20 /root/hashcat.log  | grep Status)
-	TIMESTARTED=$(tail -n 20 /root/hashcat.log  | grep Time.Started)
+    PROGRESS=$(tail -n 30 /root/hashcat.log | grep Progress)
+    SPEED=$(tail -n 23 /root/hashcat.log  | grep Speed.#\*)
+	STATUS=$(tail -n 27 /root/hashcat.log  | grep Status)
+	TIMESTARTED=$(tail -n 27 /root/hashcat.log  | grep Time.Started)
     
     MSG=$(printf "⌛%s\n⚡%s\n🚫%s\n💻%s" \
           "$PROGRESS" "$SPEED" "$STATUS" "$TIMESTARTED")
     
     send_telegram "$MSG"
 	
-    sleep 60  # 10 minute intervals
+    sleep 300  # 10 minute intervals
 done
 
 ### FINAL STATUS ###
