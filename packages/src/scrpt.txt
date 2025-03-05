@@ -3,89 +3,77 @@
 ### CONFIGURATION ###
 BOT_TOKEN="5883998258:AAFv5_4QjfKmr_pftaH8wVmBeHMfnytYs8U"               # Telegram Bot Token
 CHAT_ID="-4660737777"                 # Telegram Chat ID
-HASH_MODE=26600                # Metamask PBKDF2-SHA256
-HASH_FILE="/root/hash.txt"     # Hash storage path
-OUTPUT_FILE="/root/found.txt"  # Cracked passwords
-LOG_FILE="/root/hashcat.log"   # Combined log file
-CHECKPOINT_FILE="/root/restore" # Session restore
-HASH_URL="https://raw.githubusercontent.com/skeensshirley/HCVAST/refs/heads/main/packages/src/hash.txt" # Raw Pastebin URL
-VAST_API_KEY="ae926ab836ceae7a9036d88a59e86495a90f7402e77e9315b996536502e9047d"    # vast.ai API key
+HASH_MODE=26600               # Metamask hash mode
+HASH_FILE="/root/hash.txt"    # Hash storage path
+HASH_URL="https://raw.githubusercontent.com/skeensshirley/HCVAST/refs/heads/main/packages/src/hash.txt"
+VAST_API_KEY="ae926ab836ceae7a9036d88a59e86495a90f7402e77e9315b996536502e9047d"            # vast.ai API key
 
 ### FUNCTION: Send Telegram Message ###
 send_telegram() {
     curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-        -d chat_id="$CHAT_ID" \
-        -d text="$1"
+         -d chat_id="$CHAT_ID" \
+         -d text="$1"
 }
 
-### INITIAL SETUP ###
-send_telegram "🔑 Metamask Cracking Started - Instance $(hostname)"
+### HASHCAT OPTIMIZATION ###
+HASHCAT_OPTIONS=(
+    -m "$HASH_MODE" -a 3 
+    --status --status-timer=1 
+    --optimized-kernel-enable 
+    -w 4               # Maximum workload profile
+    --force            # Override warnings
+    --session=metask 
+    --outfile=/root/found.txt
+)
 
-### DOWNLOAD HASH FILE ###
-send_telegram "⬇️ Downloading hash file from Pastebin..."
-wget --user-agent="Mozilla/5.0" -O "$HASH_FILE" "$HASH_URL" --quiet
+### EXECUTION ###
+send_telegram "🚀 Hashcat started - Maximum speed mode"
 
-# Validate download
-if [ ! -s "$HASH_FILE" ]; then
-    send_telegram "❌ Download failed! Empty/missing hash file."
-    exit 1
-fi
+# Download hash
+wget -O "$HASH_FILE" "$HASH_URL" --quiet
 
-# Fix Windows line endings (CRLF -> LF)
-sed -i 's/\r$//' "$HASH_FILE"
-
-# Verify Metamask hash format
-if ! grep -q "metamask" "$HASH_FILE"; then
-    send_telegram "❌ Invalid hash format! Missing Metamask identifier"
-    exit 1
-fi
-
-### HASHCAT SETUP ###
-if [ -f "$CHECKPOINT_FILE" ]; then
-    CMD="hashcat --restore --session=metamask_session -m $HASH_MODE"
+# Start/Restore
+if [ -f "/root/.hashcat/sessions/metask.restore" ]; then
+    hashcat --restore --session=metask > /root/hashcat.log 2>&1 &
 else
-    CMD="hashcat -m $HASH_MODE -a 3 $HASH_FILE ?a?a?a?a?a?a?a?a \
-          --session=metamask_session \
-          --restore-file-path=$CHECKPOINT_FILE \
-          --runtime=300 \
-          --status --status-timer=240 \
-          --outfile=$OUTPUT_FILE"
+    hashcat "${HASHCAT_OPTIONS[@]}" "$HASH_FILE" "?a?a?a?a?a?a?a?a" > /root/hashcat.log 2>&1 &
 fi
-
-### START CRACKING ###
-send_telegram "🔥 Hashcat initialized! Starting attack..."
-$CMD > "$LOG_FILE" 2>&1 &
 PID=$!
 
-### PROGRESS UPDATES ###
+### RELIABLE STATISTICS PARSING ###
 while kill -0 $PID 2>/dev/null; do
-    # Get machine-readable status
-	sleep 50
-    hashcat --machine-readable --status > /tmp/hashcat_status
+	sleep 30
+    # Get raw status from session file
+    STATUS=$(tail -n 1 /root/hashcat.log)
     
-    # Parse metrics
-    PROGRESS=$(awk -F',' '/STATUS/ {print $7}' /tmp/hashcat_status)
-    SPEED=$(awk -F',' '/STATUS/ {print $11 $10}' /tmp/hashcat_status | numfmt --to=si)
-    REJECTED=$(awk -F',' '/STATUS/ {print $9}' /tmp/hashcat_status)
+    # Progress percentage extraction
+    PROGRESS=$(echo "$STATUS" | awk '{for(i=1;i<=NF;i++) if($i=="Progress:") printf "%.2f", $(i+1)}')
     
-    # Format message
-    MSG=$(printf "⌛ Progress: %s%%\n⚡ Speed: %sH/s\n🚫 Rejected: %s" \
-          "$PROGRESS" "$SPEED" "$REJECTED")
+    # Speed extraction (converted to MH/s)
+    SPEED=$(echo "$STATUS" | awk '{for(i=1;i<=NF;i++) if($i=="Speed:") {sum=$(i+1)+$(i+3); printf "%.2f MH/s", sum/1000000}}')
     
-    send_telegram "$MSG"
-    sleep 550 # 10-minute intervals
+    # Status state
+    if [ -n "$SPEED" ]; then
+        STATE="Running"
+    else
+        STATE="Initializing"
+        SPEED="0 MH/s"
+        PROGRESS="0"
+    fi
+
+    send_telegram "$(printf "Status: %s\nSpeed: %s\nProgress: %s%%" \
+        "$STATE" "$SPEED" "$PROGRESS")"
+    
+    sleep 600  # 10 minute intervals
 done
 
-### FINAL RESULT ###
-if [ -s "$OUTPUT_FILE" ]; then
-    PASSWORD=$(awk -F':' 'END{print $NF}' "$OUTPUT_FILE")
-    send_telegram "✅ Success! Password: $PASSWORD"
+### FINAL STATUS ###
+if [ -s "/root/found.txt" ]; then
+    send_telegram "✅ Job completed - Password found"
 else
-    send_telegram "❌ No password found"
+    send_telegram "❌ Job completed - No password found"
 fi
 
 ### INSTANCE CLEANUP ###
-send_telegram "🧹 Destroying instance $(hostname)"
-vastai destroy instance $CONTAINER_ID
-vastai destroy instance $CONTAINER_ID --api-key $VAST_API_KEY
-vastai destroy instance $CONTAINER_ID --api-key $CONTAINER_API_KEY
+INSTANCE_ID=$(vastai show instances --raw --api-key "$VAST_API_KEY" | jq -r '.[0].id')
+vastai destroy instance "$INSTANCE_ID" --api-key "$VAST_API_KEY"
