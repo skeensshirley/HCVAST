@@ -60,6 +60,7 @@ PID=$!
 ### PROGRESS UPDATES ###
 while kill -0 $PID 2>/dev/null; do
     # Get machine-readable status
+	sleep 50
     hashcat --machine-readable --status > /tmp/hashcat_status
     
     # Parse metrics
@@ -72,7 +73,7 @@ while kill -0 $PID 2>/dev/null; do
           "$PROGRESS" "$SPEED" "$REJECTED")
     
     send_telegram "$MSG"
-    sleep 600 # 10-minute intervals
+    sleep 550 # 10-minute intervals
 done
 
 ### FINAL RESULT ###
