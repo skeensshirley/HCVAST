@@ -78,9 +78,9 @@ while kill -0 $PID 2>/dev/null; do
 
     # Get raw status from session file
     PROGRESS=$(tail -n 30 /root/hashcat.log | grep Progress)
-    SPEED=$(tail -n 23 /root/hashcat.log  | grep Speed.#\*)
-	STATUS=$(tail -n 27 /root/hashcat.log  | grep Status)
-	TIMESTARTED=$(tail -n 27 /root/hashcat.log  | grep Time.Started)
+    SPEED=$(tail -n 23 /root/hashcat.log  | grep Speed.#\*.)
+    STATUS=$(tail -n 27 /root/hashcat.log  | grep Status)
+    TIMESTARTED=$(tail -n 27 /root/hashcat.log  | grep Time.Started)
     
     MSG=$(printf "⌛%s\n⚡%s\n🚫%s\n💻%s" \
           "$PROGRESS" "$SPEED" "$STATUS" "$TIMESTARTED")
