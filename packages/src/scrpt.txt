@@ -50,7 +50,7 @@ send_telegram() {
 ### HASHCAT OPTIMIZATION ###
 HASHCAT_OPTIONS=(
     -m "$HASH_MODE" -a 3 
-    --status --status-timer=30 
+    --status --status-timer=10 
     --optimized-kernel-enable 
     -w 3               # Maximum workload profile
     --session=metask 
@@ -77,9 +77,11 @@ sleep 60
 while kill -0 $PID 2>/dev/null; do
 
     # Get raw status from session file
-    MESSAGETG=$(tail -19 /root/hashcat.log)
-   
-    send_telegram "$(printf "$MESSAGETG")"
+    PROGRESS=$(tail -n 13 /root/hashcat.log | grep Progress)
+    SPEED=$(tail -n 20 /root/hashcat.log  | grep Speed)
+	STATUS=$(tail -n 20 /root/hashcat.log  | grep Status)
+	TIMESTARTED=$(tail -n 20 /root/hashcat.log  | grep Time.Started)
+    send_telegram "$(printf "✅ "$STATUS"\n"⌛ "$PROGRESS"\n⚡"$SPEED"\n💻"$TIMESTARTED"")"
     
     sleep 600  # 10 minute intervals
 done
