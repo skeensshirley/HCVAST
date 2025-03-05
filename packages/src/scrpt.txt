@@ -18,12 +18,14 @@ send_telegram() {
 ### HASHCAT OPTIMIZATION ###
 HASHCAT_OPTIONS=(
     -m "$HASH_MODE" -a 3 
-    --status --status-timer=1 
+    --status --status-timer=30 
     --optimized-kernel-enable 
     -w 4               # Maximum workload profile
-    --force            # Override warnings
     --session=metask 
+	--runtime=600 
+	--gpu-temp-retain=89
     --outfile=/root/found.txt
+	-S
 )
 
 ### EXECUTION ###
@@ -44,18 +46,11 @@ PID=$!
 while kill -0 $PID 2>/dev/null; do
 	sleep 10
     # Get raw status from session file
-    STATUS=$(tail -n 1 /root/hashcat.log)
+    MESSAGETG=$(tail -25 /root/hashcat.log)
+   
+    send_telegram "$(printf "$MESSAGETG")"
     
-    # Progress percentage extraction
-    PROGRESS=$(echo "$STATUS" | awk '{for(i=1;i<=NF;i++) if($i=="Progress:") printf "%.2f", $(i+1)}')
-    
-    # Speed extraction (converted to MH/s)
-    SPEED=$(echo "$STATUS" | awk '{for(i=1;i<=NF;i++) if($i=="Speed:") {sum=$(i+1)+$(i+3); printf "%.2f MH/s", sum/1000000}}')
-    
-    send_telegram "$(printf "Status: %s\nSpeed: %s\nProgress: %s%%" \
-        "$STATE" "$SPEED" "$PROGRESS")"
-    
-    sleep 10  # 10 minute intervals
+    sleep 600  # 10 minute intervals
 done
 
 ### FINAL STATUS ###
@@ -66,5 +61,8 @@ else
 fi
 
 ### INSTANCE CLEANUP ###
-INSTANCE_ID=$(vastai show instances --raw --api-key "$VAST_API_KEY" | jq -r '.[0].id')
-vastai destroy instance "$INSTANCE_ID" --api-key "$VAST_API_KEY"
+env >> /etc/environment
+send_telegram "🧹 Destroying instance ($CONTAINER_ID)"
+vastai destroy instance $CONTAINER_ID
+vastai destroy instance $CONTAINER_ID --api-key $VAST_API_KEY
+vastai destroy instance $CONTAINER_ID --api-key $CONTAINER_API_KEY
