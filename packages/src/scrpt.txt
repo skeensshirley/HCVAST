@@ -20,10 +20,10 @@ HASHCAT_OPTIONS=(
     -m "$HASH_MODE" -a 3 
     --status --status-timer=30 
     --optimized-kernel-enable 
-    -w 4               # Maximum workload profile
+    -w 3               # Maximum workload profile
     --session=metask 
 	--runtime=600 
-	--gpu-temp-retain=89
+	--hwmon-disable
     --outfile=/root/found.txt
 	-S
 )
