@@ -15,42 +15,56 @@ send_telegram() {
          -d text="$1"
 }
 
-### HASHCAT LAUNCH ###
-send_telegram "🚀 Hashcat started - Active cracking session"
+### HASHCAT OPTIMIZATION ###
+HASHCAT_OPTIONS=(
+    -m "$HASH_MODE" -a 3 
+    --status --status-timer=1 
+    --optimized-kernel-enable 
+    -w 4               # Maximum workload profile
+    --force            # Override warnings
+    --session=metask 
+    --outfile=/root/found.txt
+)
 
+### EXECUTION ###
+send_telegram "🚀 Hashcat started - Maximum speed mode"
+
+# Download hash
+wget -O "$HASH_FILE" "$HASH_URL" --quiet
+
+# Start/Restore
 if [ -f "/root/.hashcat/sessions/metask.restore" ]; then
     hashcat --restore --session=metask > /root/hashcat.log 2>&1 &
 else
-    hashcat -m $HASH_MODE -a 3 "$HASH_FILE" "?a?a?a?a?a?a?a?a" \
-        --status --status-timer=10 \
-        --optimized-kernel-enable \
-        -w 4 \
-        --session=metask \
-        --outfile=/root/found.txt > /root/hashcat.log 2>&1 &
+    hashcat "${HASHCAT_OPTIONS[@]}" "$HASH_FILE" "?a?a?a?a?a?a?a?a" > /root/hashcat.log 2>&1 &
 fi
 PID=$!
 
 ### RELIABLE STATISTICS PARSING ###
 while kill -0 $PID 2>/dev/null; do
-    # Get latest progress line
-    PROGRESS_LINE=$(grep -a "Progress.........:" /root/hashcat.log | tail -1)
-    SPEED_LINE=$(grep -a "Speed...........:" /root/hashcat.log | tail -1)
+	sleep 10
+    # Get raw status from session file
+    STATUS=$(tail -n 1 /root/hashcat.log)
     
-    # Extract progress percentage
-    PROGRESS_PCT=$(echo "$PROGRESS_LINE" | awk '{print $4}' | tr -d '()%')
+    # Progress percentage extraction
+    PROGRESS=$(echo "$STATUS" | awk '{for(i=1;i<=NF;i++) if($i=="Progress:") printf "%.2f", $(i+1)}')
     
-    # Calculate accurate speed
-    SPEED=$(echo "$SPEED_LINE" | awk '{
-        gsub(/,/, "", $2);
-        gsub(/,/, "", $4);
-        sum = $2 + $4;
-        printf "%.2f MH/s", sum/1000000
-    }')
-
+    # Speed extraction (converted to MH/s)
+    SPEED=$(echo "$STATUS" | awk '{for(i=1;i<=NF;i++) if($i=="Speed:") {sum=$(i+1)+$(i+3); printf "%.2f MH/s", sum/1000000}}')
+    
     send_telegram "$(printf "Status: %s\nSpeed: %s\nProgress: %s%%" \
-        "$STATE" "$SPEED" "$PROGRESS_PCT")"
+        "$STATE" "$SPEED" "$PROGRESS")"
     
-    sleep 20
+    sleep 10  # 10 minute intervals
 done
 
-### FINAL CLEANUP (keep existing) ###
+### FINAL STATUS ###
+if [ -s "/root/found.txt" ]; then
+    send_telegram "✅ Job completed - Password found"
+else
+    send_telegram "❌ Job completed - No password found"
+fi
+
+### INSTANCE CLEANUP ###
+INSTANCE_ID=$(vastai show instances --raw --api-key "$VAST_API_KEY" | jq -r '.[0].id')
+vastai destroy instance "$INSTANCE_ID" --api-key "$VAST_API_KEY"
