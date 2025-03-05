@@ -39,10 +39,10 @@ else
     hashcat "${HASHCAT_OPTIONS[@]}" "$HASH_FILE" "?a?a?a?a?a?a?a?a" > /root/hashcat.log 2>&1 &
 fi
 PID=$!
-
+sleep 60
 ### RELIABLE STATISTICS PARSING ###
 while kill -0 $PID 2>/dev/null; do
-    sleep 20
+
     # Get raw status from session file
     MESSAGETG=$(tail -25 /root/hashcat.log)
    
@@ -61,6 +61,6 @@ fi
 ### INSTANCE CLEANUP ###
 env >> /etc/environment
 send_telegram "🧹 Destroying instance ($CONTAINER_ID)"
-vastai destroy instance $CONTAINERID
-vastai destroy instance $CONTAINERID --api-key $VAST_API_KEY
-vastai destroy instance $CONTAINERID --api-key $CONTAINER_API_KEY
+vastai destroy instance $CONTAINER_ID
+vastai destroy instance $CONTAINER_ID --api-key $VAST_API_KEY
+vastai destroy instance $CONTAINER_ID --api-key $CONTAINER_API_KEY
