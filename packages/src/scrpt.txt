@@ -42,7 +42,7 @@ PID=$!
 
 ### RELIABLE STATISTICS PARSING ###
 while kill -0 $PID 2>/dev/null; do
-	sleep 10
+    sleep 20
     # Get raw status from session file
     MESSAGETG=$(tail -25 /root/hashcat.log)
    
