@@ -81,8 +81,12 @@ while kill -0 $PID 2>/dev/null; do
     SPEED=$(tail -n 20 /root/hashcat.log  | grep Speed)
 	STATUS=$(tail -n 20 /root/hashcat.log  | grep Status)
 	TIMESTARTED=$(tail -n 20 /root/hashcat.log  | grep Time.Started)
-    send_telegram "$(printf "✅ "$STATUS"\n"⌛ "$PROGRESS"\n⚡"$SPEED"\n💻"$TIMESTARTED"")"
     
+    MSG=$(printf "⌛%s\n⚡%s\n🚫%s\n💻%s" \
+          "$PROGRESS" "$SPEED" "$STATUS" "$TIMESTARTED")
+    
+    send_telegram "$MSG"
+	
     sleep 600  # 10 minute intervals
 done
 
