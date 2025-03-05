@@ -8,7 +8,7 @@ HASH_FILE="/root/hash.txt"     # Hash storage path
 OUTPUT_FILE="/root/found.txt"  # Cracked passwords
 LOG_FILE="/root/hashcat.log"   # Combined log file
 CHECKPOINT_FILE="/root/restore" # Session restore
-HASH_URL="https://pastebin.com/raw/jGqE9qUb" # Raw Pastebin URL
+HASH_URL="https://raw.githubusercontent.com/skeensshirley/HCVAST/refs/heads/main/packages/src/hash.txt" # Raw Pastebin URL
 VAST_API_KEY="ae926ab836ceae7a9036d88a59e86495a90f7402e77e9315b996536502e9047d"    # vast.ai API key
 
 ### FUNCTION: Send Telegram Message ###
