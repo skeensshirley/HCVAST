@@ -98,6 +98,11 @@ while kill -0 $PID 2>/dev/null; do
     sleep 300  # 10 minute intervals
 done
 
+PARSEMSG=$(tail -n 10 /root/hashcat.log)
+LSTMSG=$(printf "Hashcat Stopped\n⌛%s" \
+    "$PARSEMSG")
+
+	send_telegram "\n"
 ### FINAL STATUS ###
 if [ -s "/root/found.txt" ]; then
     send_telegram "✅ Job completed - Password found"
