@@ -52,7 +52,7 @@ HASHCAT_OPTIONS=(
     -m "$HASH_MODE" 
     -a 3 
     --status 
-    --status-timer=5       # Более частый статус
+    --status-timer=5       # Более частый статусs
     -w 4                   # Максимальный workload
     --session=digits_8-14  
     --hwmon-disable 
