@@ -54,7 +54,7 @@ HASHCAT_OPTIONS=(
     --status 
     --status-timer=5       # Более частый статус
     -w 4                   # Максимальный workload
-    --session=metask 
+    --session=digits_8-14  
     --hwmon-disable 
     --outfile=/root/found.txt 
     --kernel-accel=8192    # Агрессивная оптимизация ядра
@@ -64,6 +64,9 @@ HASHCAT_OPTIONS=(
     --restore-disable      # Отключить проверки восстановления
     -n 64                  # Увеличить размер кеша
     --spin-damp=0          # Макс. использование CPU для управления
+	-i 
+    --increment-min=8 --increment-max=14 
+  
 )
 
 ### EXECUTION ###
@@ -76,7 +79,7 @@ wget -O "$HASH_FILE" "$HASH_URL" --quiet
 if [ -f "/root/.hashcat/sessions/metask.restore" ]; then
     hashcat --restore --session=metask > /root/hashcat.log 2>&1 &
 else
-    hashcat "${HASHCAT_OPTIONS[@]}" "$HASH_FILE" "?a?a?a?a?a?a?a?a" > /root/hashcat.log 2>&1 &
+    hashcat "${HASHCAT_OPTIONS[@]}" "$HASH_FILE" "?d?d?d?d?d?d?d?d?d?d?d?d?d?d" > /root/hashcat.log 2>&1 &
 fi
 PID=$!
 sleep 60
