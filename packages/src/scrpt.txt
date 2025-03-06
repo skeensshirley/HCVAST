@@ -52,17 +52,16 @@ HASHCAT_OPTIONS=(
     -m "$HASH_MODE" 
     -a 3 
     --status 
-    --status-timer=5       # Более частый статусs
+    --status-timer=5       # Более частый статус
     -w 4                   # Максимальный workload
     --session=digits_8-14  
     --hwmon-disable 
     --outfile=/root/found.txt 
-    --kernel-accel=1024    # Агрессивная оптимизация ядра
     --force                # Подавить предупреждения
     --optimized-kernel-enable 
     --restore-disable      # Отключить проверки восстановления
     --spin-damp=0          # Макс. использование CPU для управления
-	-i 
+    -i 
     --increment-min=8 --increment-max=12 
   
 )
