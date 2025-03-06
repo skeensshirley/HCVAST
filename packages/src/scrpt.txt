@@ -57,8 +57,7 @@ HASHCAT_OPTIONS=(
     --session=digits_8-14  
     --hwmon-disable 
     --outfile=/root/found.txt 
-	--backend-kernel-threads=64
-    --kernel-accel=8192    # Агрессивная оптимизация ядра
+    --kernel-accel=8196    # Агрессивная оптимизация ядра
     --force                # Подавить предупреждения
     --optimized-kernel-enable 
     --restore-disable      # Отключить проверки восстановления
