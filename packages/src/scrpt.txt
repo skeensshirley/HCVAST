@@ -57,15 +57,14 @@ HASHCAT_OPTIONS=(
     --session=digits_8-14  
     --hwmon-disable 
     --outfile=/root/found.txt 
+	--backend-kernel-threads=64
     --kernel-accel=8192    # Агрессивная оптимизация ядра
-    --kernel-loops=32      # Увеличивает нагрузку на GPU
     --force                # Подавить предупреждения
     --optimized-kernel-enable 
     --restore-disable      # Отключить проверки восстановления
-    -n 64                  # Увеличить размер кеша
     --spin-damp=0          # Макс. использование CPU для управления
 	-i 
-    --increment-min=8 --increment-max=14 
+    --increment-min=8 --increment-max=12 
   
 )
 
